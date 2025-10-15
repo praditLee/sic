@@ -1,11 +1,182 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// --- SCRIPT SECTION ---
+import { getCollection } from "astro:content";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import CourseCard from "../components/CourseCard.astro";
+import "../styles/global.css";
+// ดึงข้อมูลคอร์สทั้งหมดและเรียงลำดับจากใหม่ไปเก่า
+const allCourses = (await getCollection("courses")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Samsung Innovation Campus</title>
+    <meta
+      name="description"
+      content="ปลดล็อกศักยภาพด้านเทคโนโลยี สร้างความเชี่ยวชาญก้าวไปเป็นผู้นำสำหรับโลกยุคใหม่"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <style>
+      body {
+        font-family: "Sarabun", sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-white text-gray-800">
+    <Header />
+
+    <main
+      class="relative text-white"
+      style="background: linear-gradient(90deg, #1E3A8A 0%, #3B82F6 100%);
+	  background-image: url('/images/bg1440x720_blank2.webp');
+	  background-size: cover;
+	  background-position: center;"
+    >
+      <div
+        class="container mx-auto px-6 py-20 md:py-28 grid md:grid-cols-2 gap-10 items-center"
+      >
+        <div class="flex flex-col items-center md:items-start space-y-6">
+          <h1
+            class="text-4xl md:text-6xl font-extrabold tracking-tight text-left"
+          >
+            Samsung<br />
+            Innovation<br class="md:hidden" />
+            Campus
+          </h1>
+          <p
+            class="text-xl md:text-2xl text-blue-100/90 text-center md:text-left hero-title"
+          >
+            ปลดล็อกศักยภาพด้านเทคโนโลยี<br
+            />สร้างความเชี่ยวชาญก้าวไปเป็นผู้นำสำหรับโลกยุคใหม่
+          </p>
+          <a
+            href="https://courses.samsungsic-thailand.org/users/sign_in"
+            id="hero-register-btn"
+            class="inline-block bg-white text-blue-700 font-bold py-3 px-8 rounded-lg text-lg hover:bg-gray-200 transition-transform hover:scale-105 shadow-lg"
+          >
+            <h5>ลงทะเบียนเข้าเรียนที่นี่!</h5>
+          </a>
+        </div>
+        <div class="hidden md:flex justify-center">
+          <img
+            src="/images/SIC2025-key_picture-BG.webp"
+            alt="Innovation Illustration"
+            class="w-full max-w-lg"
+          />
+        </div>
+      </div>
+    </main>
+
+    <section class="container mx-auto px-6 py-20">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-12 text-center">
+        <div class="flex flex-col items-center space-y-3">
+          <div class="flex items-center justify-center w-32 h-32 mb-6">
+            <img src="/images/tech_idea.png" alt="เข้าใจเทคโนโลยี" />
+          </div>
+          <h3 class="text-xl font-bold">เข้าใจเทคโนโลยี</h3>
+          <p class="text-gray-600">
+            สร้างพื้นฐานและไขข้อสงสัยเกี่ยวกับเทคโนโลยีใหม่ๆ
+            เรียนรู้วิธีประยุกต์ใช้อย่างมีประสิทธิภาพในการทำงาน การเรียน
+            และชีวิตส่วนตัว
+          </p>
+        </div>
+        <div class="flex flex-col items-center space-y-3">
+          <div class="flex items-center justify-center w-32 h-32 mb-6">
+            <img src="/images/easy-learn.png" alt="อธิบายอย่างเข้าใจง่าย" />
+          </div>
+          <h3 class="text-xl font-bold">อธิบายอย่างเข้าใจง่าย</h3>
+          <p class="text-gray-600">
+            สำรวจคอร์สเรียนแบบ interactive สำหรับทุกคน เข้าถึงได้ง่าย
+            ไม่ต้องมีประสบการณ์มาก่อน
+          </p>
+        </div>
+        <div class="flex flex-col items-center space-y-3">
+          <div class="flex items-center justify-center w-32 h-32 mb-6">
+            <img src="/images/improve_yourself2.png" alt="เสริมพลังให้ตัวเอง" />
+          </div>
+          <h3 class="text-xl font-bold">เสริมพลังให้ตัวเอง</h3>
+          <p class="text-gray-600">
+            เติมเต็มความรู้ใหม่และเชื่อมโยงความคิด ยิ่งรู้รอบตัว
+            ยิ่งสร้างสรรค์และตามพัฒนาการของเทคโนโลยีได้อย่างยั่งยืน
+          </p>
+        </div>
+        <div class="flex flex-col items-center space-y-3">
+          <div class="flex items-center justify-center w-32 h-32 mb-6">
+            <img src="/images/certi2.png" alt="การเรียนรู้ที่สอดคล้องกับคุณ" />
+          </div>
+          <h3 class="text-xl font-bold">การเรียนรู้ที่สอดคล้องกับคุณ</h3>
+          <p class="text-gray-600">
+            เรียนรู้ตามตารางเวลาของตัวเอง และรับใบรับรอง (e-Certificate)
+            หลังจากผ่านการทดสอบความรู้
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="courses" class="bg-slate-50 py-20">
+      <div class="container mx-auto px-6">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold">คอร์สเรียนแนะนำ</h2>
+          <p class="text-gray-600 mt-2 text-lg">
+            เริ่มต้นการเดินทางของคุณกับคอร์สที่ใช่สำหรับคุณ
+          </p>
+        </div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {allCourses.map((course) => <CourseCard course={course} />)}
+        </div>
+        <a
+          id="footer-register-btn"
+          href="https://courses.samsungsic-thailand.org/users/sign_in"
+          class="w-60 mx-auto mt-20 block text-center bg-blue-600 text-white rounded-lg font-bold py-3 px-8 hover:bg-blue-700 transition"
+        >
+          <h4 class="text-lg font-bold">ลงทะเบียนเข้าเรียนที่นี่!</h4>
+        </a>
+      </div>
+    </section>
+
+    <Footer />
+
+    <script>
+      // ฟังก์ชันสำหรับส่ง event ไปที่ Facebook Pixel
+      function trackRegistrationClick() {
+        // เช็คก่อนว่า fbq function พร้อมใช้งานหรือไม่
+        if (typeof fbq === "function") {
+          fbq("track", "regisbutton");
+          console.log("Facebook Pixel: Tracked regisbutton click");
+        } else {
+          console.log("Facebook Pixel (fbq) is not defined.");
+        }
+      }
+
+      // 1. หาปุ่มใน Hero Section ด้วย id
+      const heroButton = document.getElementById("hero-register-btn");
+      // ถ้าหาปุ่มเจอ ให้ดักฟัง event การคลิก
+      if (heroButton) {
+        heroButton.addEventListener("click", trackRegistrationClick);
+      }
+
+      // 2. หาปุ่มที่ท้ายหน้าด้วย id (ถ้ามี)
+      const footerButton = document.getElementById("footer-register-btn");
+      if (footerButton) {
+        footerButton.addEventListener("click", trackRegistrationClick);
+      }
+    </script>
+  </body>
+</html>

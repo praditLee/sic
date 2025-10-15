@@ -1,0 +1,50 @@
+---
+const currentYear = new Date().getFullYear();
+const socialLinks = [
+  {
+    href: "https://www.facebook.com/samsungcsrth",
+    icon: "fa-brands fa-facebook-f",
+    label: "Facebook",
+  },
+  {
+    href: "https://www.instagram.com/samsungcsr_th",
+    icon: "fa-brands fa-instagram",
+    label: "Instagram",
+  },
+  { href: "https://x.com/samsungcsrth", icon: "fa-brands fa-x", label: "X" },
+  {
+    href: "https://line.me/R/ti/p/@samsungcsr.th",
+    icon: "fa-solid fa-comment-dots",
+    label: "Line",
+  },
+];
+---
+
+<footer class="bg-gray-100 border-t">
+  <div class="container mx-auto px-6 py-6">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-center md:text-left">
+        <p class="text-sm text-gray-500">
+          &copy; {currentYear} ออกแบบและพัฒนาหลักสูตรโดย บริษัท สยามเมนทิส จำกัด
+          สงวนลิขสิทธิ์ตามพระราชบัญญัติฯ
+        </p>
+      </div>
+
+      <div class="flex items-center space-x-5">
+        {
+          socialLinks.map((link) => (
+            <a
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={link.label}
+              class="text-gray-500 hover:text-blue-600 transition text-xl"
+            >
+              <i class={link.icon} />
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</footer>

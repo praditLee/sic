@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+/* --- ประกาศฟอนต์ที่นี่ --- */
+@font-face {
+  font-family: 'Samsung Sharp Sans';
+  src: url('/fonts/SamsungSharpSans-Regular.woff2') format('woff2');
+  font-weight: normal; /* หรือ 400 */
+  font-style: normal;
+  font-display: swap; /* ทำให้ข้อความแสดงผลเร็วขึ้น */
+}
+
+@font-face {
+  font-family: 'Samsung Sharp Sans';
+  src: url('/fonts/SamsungSharpSans-Bold.woff2') format('woff2');
+  font-weight: bold; /* หรือ 700 */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SamsungOne';
+  src: url('/fonts/SamsungOneThaiLoopless-450_v1.0.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SamsungOne';
+  src: url('/fonts/SamsungOneThaiLoopless-700_v1.0.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --- โค้ด Tailwind และอื่นๆ จะอยู่ต่อจากนี้ --- */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- กำหนดการใช้งานฟอนต์ --- */
+h1, h2, h3, h4, h5, h6, .nav-panel , .hero-title {
+    font-family: 'Samsung Sharp Sans', 'SamsungOne', Arial, Helvetica, sans-serif;
+}
+
+/* หรือกำหนดให้ทั้งเว็บใช้ฟอนต์นี้เป็นหลัก */
+body {
+    font-family: 'SamsungOne', Arial, Helvetica, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, .nav-panel li {
+    font-family: 'Samsung Sharp Sans', 'SamsungOne', Arial, Helvetica, sans-serif !important;
+}

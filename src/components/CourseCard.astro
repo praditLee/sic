@@ -1,0 +1,29 @@
+---
+const { course } = Astro.props;
+// ดึง thinkificUrl ออกมาจาก data
+const { title, category, description, image, thinkificUrl } = course.data;
+---
+
+<div
+  class="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col transition-transform duration-300 hover:scale-105 hover:shadow-xl"
+>
+  <img
+    src={image}
+    alt={`ภาพประกอบคอร์ส ${title}`}
+    class="w-full object-cover"
+  />
+  <div class="p-6 flex flex-col flex-grow">
+    <!-- <span class="text-sm text-gray-500">{category}</span> -->
+    <h4 class="text-xl font-bold mt-1 text-gray-800">{title}</h4>
+    <p class="text-gray-600 mt-2 flex-grow">{description}</p>
+
+    <a
+      href={thinkificUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="w-full mt-6 block text-center bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition"
+    >
+      <h5 class="text-lg font-bold">คลิกเพื่อเข้าเรียน</h5>
+    </a>
+  </div>
+</div>

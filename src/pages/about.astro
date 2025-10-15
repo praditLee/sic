@@ -1,0 +1,56 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/global.css";
+---
+
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>About Us</title>
+  </head>
+  <body class="flex flex-col min-h-screen">
+    <Header />
+    <main
+      class="relative text-white min-h-[450px]"
+      style="
+      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),url('/images/2P6A3266_web.jpg');
+      background-size: cover;
+      background-position: center;"
+    >
+      <div class="container mx-auto px-6 py-16">
+        <h3 class="text-2xl font-bold mb-6">รู้จักโครงการ</h3>
+        <h1
+          class="text-4xl md:text-6xl font-extrabold tracking-tight text-left"
+        >
+          Samsung<br />
+          Innovation<br class="md:hidden" />
+          Campus
+        </h1>
+      </div>
+    </main>
+    <section class="bg-white py-12 flex-grow">
+      <div class="container mx-auto px-8 text-gray-800">
+        <p class="text-lg mb-4">
+          Samsung Innovation Campus เป็นโครงการเพื่อสังคมของบริษัท ไทยซัมซุง
+          อิเลคโทรนิคส์ จำกัด มีเป้าหมายมุ่งสร้างทักษะดิจิทัลให้กับเยาวชนไทย
+          เพื่อให้มีทักษะแห่งอนาคตและพร้อมที่จะเติบโตในยุคปฏิวัติอุตสาหกรรมยุคที่
+          4
+        </p>
+        <p class="text-lg mb-4">
+          กิจกรรมหลักของโครงการ Samsung Innovation Campus คือ
+          การอบรมทักษะดิจิทัลให้กับเยาวชนไทย ในด้าน Coding & Programming, AI และ
+          IoT โดยในปี 2563 ได้เน้นการอบรมด้าน Coding & Programming
+          เพื่อสอดคล้องกับนโยบายดิจิทัลไทยแลนด์ของภาครัฐ
+          รวมถึงเตรียมความพร้อมเยาวชนให้มีทักษะแห่งอนาคต โดยจุดเด่นของการโครงการ
+          คือ การผนวกการอบรมเข้ากับกิจกรรมเสริมในรูปแบบของ Active Learning
+          Bootcamp ที่นอกจากจะทำให้ผู้เข้าร่วมโครงการได้พัฒนาทักษะการเขียน Code
+          และ Programming แล้ว ยังได้เรียนรู้เกี่ยวกับเทคโนโลยี
+          เครื่องมือและกระบวนการในการคิดและทำโครงงานเพื่อนำไปใช้ในเบื้องต้นได้
+        </p>
+      </div>
+    </section>
+    <Footer />
+  </body>
+</html>
