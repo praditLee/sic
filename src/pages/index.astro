@@ -156,7 +156,71 @@ const allCourses = (await getCollection("courses")).sort(
     </section>
 
     <Footer />
+    <div
+      id="image-popup"
+      role="dialog"
+      aria-modal="true"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center"
+    >
+      <div id="popup-overlay" class="fixed inset-0 bg-black/60"></div>
 
+      <div
+        class="relative bg-white rounded-lg shadow-xl w-11/12 max-w-lg mx-auto z-10"
+      >
+        <button
+          id="close-popup-btn"
+          class="absolute -top-4 -right-4 bg-white rounded-full w-10 h-10 text-2xl text-gray-700 hover:text-black transition flex items-center justify-center shadow-lg"
+          aria-label="Close popup"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div>
+          <img
+            src="/images/sirikit_remembrance.jpg"
+            alt="Queen Sirikit Remembrance Event"
+            class="w-full h-auto rounded-lg"
+          />
+        </div>
+      </div>
+    </div>
+    <script>
+      // 1. เลือก Element ที่เราต้องใช้
+      const popup = document.getElementById("image-popup");
+      const overlay = document.getElementById("popup-overlay");
+      const closeBtn = document.getElementById("close-popup-btn");
+
+      // 2. ฟังก์ชันสำหรับเปิด Pop up
+      function openPopup() {
+        if (popup) {
+          popup.classList.remove("hidden");
+        }
+      }
+
+      // 3. ฟังก์ชันสำหรับปิด Pop up
+      function closePopup() {
+        if (popup) {
+          popup.classList.add("hidden");
+        }
+      }
+
+      // 4. กำหนด Event Listeners
+      if (popup && overlay && closeBtn) {
+        // สั่งให้ปิด เมื่อคลิกปุ่มกากบาท
+        closeBtn.addEventListener("click", closePopup);
+
+        // สั่งให้ปิด เมื่อคลิกที่พื้นหลัง (Overlay)
+        overlay.addEventListener("click", closePopup);
+      }
+
+      // 5. สั่งให้ Pop up ทำงาน
+      // รอให้หน้าเว็บโหลดเสร็จ
+      document.addEventListener("DOMContentLoaded", () => {
+        // หน่วงเวลา 2 วินาที (2000ms) ก่อนเปิด Pop up
+        // เพื่อไม่ให้รบกวนผู้ใช้เร็วเกินไป
+        setTimeout(openPopup, 2000);
+      });
+    </script>
     <script>
       // ฟังก์ชันสำหรับส่ง event ไปที่ Facebook Pixel
       function trackRegistrationClick() {
