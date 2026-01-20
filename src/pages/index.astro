@@ -8,7 +8,7 @@ import Layout from "../layouts/Layout.astro";
 import "../styles/global.css";
 // ดึงข้อมูลคอร์สทั้งหมดและเรียงลำดับจากใหม่ไปเก่า
 const allCourses = (await getCollection("courses")).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 ---
 
@@ -150,7 +150,7 @@ const allCourses = (await getCollection("courses")).sort(
       </div>
     </div>
   </div>
-  /* ==== 3. โค้ด JAVASCRIPT (อัปเดตใหม่) ==== */
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // 1. กำหนดชื่อสำหรับเช็คใน localStorage
