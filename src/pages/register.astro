@@ -97,7 +97,7 @@ const provinces = [
       <form
         action="https://docs.google.com/forms/d/e/1FAIpQLSdOYf1-KmQPdVeLD3UyDR_im8lSvaFjwhWLp1h_gnir-Ey-dg/formResponse"
         method="POST"
-        onsubmit="return validateForm()"
+        onsubmit="submitToGoogle(event)"
         class="p-8 space-y-8"
         id="registerForm"
       >
@@ -772,11 +772,84 @@ const provinces = [
         </section>
       </form>
 
-      <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"
-      ></iframe>
-
       <script is:inline>
-        // --- 1. จัดการเรื่อง "สังกัด" (อื่นๆ) ---
+        // --- จัดการจำนวนครู ---
+        function toggleTeachers(count) {
+          const teacher3Section = document.getElementById("teacher3-section");
+          const teacher3Inputs = document.querySelectorAll(".teacher3-input");
+
+          if (count === 3) {
+            teacher3Section.classList.remove("hidden");
+            teacher3Inputs.forEach((input) =>
+              input.setAttribute("required", "true"),
+            );
+          } else {
+            teacher3Section.classList.add("hidden");
+            teacher3Inputs.forEach((input) =>
+              input.removeAttribute("required"),
+            );
+          }
+        }
+
+        async function submitToGoogle(event) {
+          // 1. หยุดไม่ให้หน้าเว็บเปลี่ยนหน้า (สำคัญมาก!)
+          event.preventDefault();
+
+          // 2. เรียกใช้การตรวจสอบข้อมูล (Validation) ของเราเอง
+          // เช็คสังกัด (Logic เดิมของคุณ)
+          const realSangkat = document.getElementById("real_sangkat");
+          if (!realSangkat.value) {
+            alert("กรุณาระบุสังกัด");
+            return; // หยุดการทำงานถ้าไม่ผ่าน
+          }
+
+          // เช็คระดับชั้น (Logic เดิมของคุณ)
+          const checkboxes = document.querySelectorAll(
+            'input[name="entry.1981480719"]:checked',
+          );
+          if (checkboxes.length === 0) {
+            alert("กรุณาระบุระดับชั้นที่รับผิดชอบสอน");
+            return; // หยุดการทำงานถ้าไม่ผ่าน
+          }
+
+          // 3. เริ่มส่งข้อมูลด้วย fetch()
+          const form = event.target;
+          const formData = new FormData(form);
+          const actionUrl = form.action;
+
+          // เปลี่ยนปุ่มเป็น "กำลังส่ง..." เพื่อให้รู้ว่าทำงานอยู่
+          const submitBtn = form.querySelector('button[type="submit"]');
+          const originalBtnText = submitBtn.innerText;
+          submitBtn.innerText = "กำลังส่งข้อมูล...";
+          submitBtn.disabled = true;
+
+          try {
+            await fetch(actionUrl, {
+              method: "POST",
+              body: formData,
+              mode: "no-cors", // <--- พระเอกของเรา: สั่งให้ส่งข้าม Domain ได้โดยไม่สน Error
+            });
+
+            // 4. เมื่อส่งเสร็จ (หรือ Browser คิดว่าส่งเสร็จ) ให้แสดง Popup
+            document
+              .getElementById("thankyou-message")
+              .classList.remove("hidden");
+            form.reset();
+
+            // รีเซ็ตค่าอื่นๆ กลับเป็นค่าเริ่มต้น
+            document
+              .getElementById("sangkat_other_input")
+              .classList.add("hidden");
+            toggleTeachers(2); // รีเซ็ตกลับมาเป็น 2 คน
+          } catch (error) {
+            console.error("Error:", error);
+            alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
+          } finally {
+            // คืนค่าปุ่มให้กลับมาเหมือนเดิม
+            submitBtn.innerText = originalBtnText;
+            submitBtn.disabled = false;
+          }
+        }
         function handleSangkatChange() {
           const select = document.getElementById("sangkat_select");
           const uiInput = document.getElementById("sangkat_other_input");
@@ -807,67 +880,12 @@ const provinces = [
             otherInput.value = "";
           }
         }
-
         function updateSangkatValue() {
           const uiInput = document.getElementById("sangkat_other_input");
           const otherInput = document.getElementById("other_response_sangkat");
 
           // อัปเดตข้อความที่จะส่งไป Google ในช่อง Other Response
           otherInput.value = uiInput.value;
-        }
-
-        // --- 2. จัดการจำนวนครู ---
-        function toggleTeachers(count) {
-          const teacher3Section = document.getElementById("teacher3-section");
-          const teacher3Inputs = document.querySelectorAll(".teacher3-input");
-
-          if (count === 3) {
-            teacher3Section.classList.remove("hidden");
-            teacher3Inputs.forEach((input) =>
-              input.setAttribute("required", "true"),
-            );
-          } else {
-            teacher3Section.classList.add("hidden");
-            teacher3Inputs.forEach((input) =>
-              input.removeAttribute("required"),
-            );
-          }
-        }
-
-        // --- 3. ตรวจสอบข้อมูลก่อนส่ง ---
-        function validateForm() {
-          // เช็คสังกัดอีกทีเพื่อความชัวร์
-          const realSangkat = document.getElementById("real_sangkat");
-          if (!realSangkat.value) {
-            alert("กรุณาระบุสังกัด");
-            return false;
-          }
-          // --- เช็คระดับชั้น (ต้องเลือกอย่างน้อย 1 อัน) ---
-          const checkboxes = document.querySelectorAll(
-            'input[name="entry.1981480719"]:checked',
-          );
-          const errorMsg = document.getElementById("grade-error");
-
-          if (checkboxes.length === 0) {
-            // ถ้าไม่มีการติ๊กเลย
-            errorMsg.classList.remove("hidden"); // แสดงข้อความสีแดง
-            alert("กรุณาระบุระดับชั้นที่รับผิดชอบสอน"); // แจ้งเตือน
-            return false; // ห้ามส่งฟอร์ม
-          } else {
-            // ถ้ามีการติ๊กแล้ว
-            errorMsg.classList.add("hidden"); // ซ่อนข้อความสีแดง
-          }
-
-          // แสดงหน้าต่างขอบคุณ
-          setTimeout(function () {
-            document
-              .getElementById("thankyou-message")
-              .classList.remove("hidden");
-            document.getElementById("registerForm").reset();
-            // รีเซ็ตค่าสังกัดกลับเป็นค่าเริ่มต้น
-            document.getElementById("sangkat_other").classList.add("hidden");
-          }, 500);
-          return true;
         }
       </script>
     </div>
