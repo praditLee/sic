@@ -1,0 +1,355 @@
+---
+import Layout from "../layouts/Layout.astro";
+import "../styles/global.css";
+---
+
+<Layout title="แบบฟอร์มแสดงความประสงค์เข้าร่วมโครงการ">
+  <main class="relative min-h-[450px] py-12 bg-blue-50">
+    <div
+      class="max-w-4xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden"
+    >
+      <div class="p-12 text-center">
+        <h2 class="text-lg">แบบฟอร์มแสดงความประสงค์เข้าร่วมโครงการ</h2>
+        <h1 class="text-2xl font-bold mt-1">
+          Samsung Innovation Campus ในปี 2569
+        </h1>
+        <div class="mb-6 mt-12 flex justify-center">
+          <a
+            href="/assets/SIC2569-agreement.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-white transition-all duration-300 bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg hover:-translate-y-1"
+          >
+            <svg
+              class="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
+            </svg>
+            รายละเอียดการเข้าร่วมโครงการต่อเนื่องและการรับทุน
+          </a>
+        </div>
+      </div>
+
+      <form
+        id="reportForm"
+        action="https://docs.google.com/forms/d/e/1FAIpQLSdBRh3lcfgxNoV3a9B-_97oQRT6tnQJ7XFxcKTZ9riAESW99Q/formResponse"
+        method="POST"
+        target="hidden_iframe"
+        class="p-8 space-y-8"
+        onsubmit="return handleSubmit(event)"
+      >
+        <section
+          class="space-y-4 border p-6 rounded-lg bg-gray-50 border-gray-200"
+        >
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >ชื่อ-สกุล *</label
+              >
+              <input
+                type="text"
+                name="entry.2120597359"
+                required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder="ระบุชื่อและนามสกุล"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >เบอร์โทรศัพท์ *</label
+              >
+              <input
+                type="tel"
+                name="entry.1652591964"
+                required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder="08X-XXX-XXXX"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >อีเมล *</label
+              >
+              <input
+                type="email"
+                name="entry.58179007"
+                required
+                placeholder="example@email.com"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:border-indigo-500 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >ชื่อโรงเรียน *</label
+              >
+              <input
+                type="text"
+                name="entry.381655348"
+                required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:border-indigo-500 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700"
+                >ปีที่เข้าร่วมโครงการ *</label
+              >
+
+              <select
+                name="entry.1095135974"
+                required
+                class="mt-1 block w-full border-gray-300 border p-2 rounded shadow-sm"
+              >
+                <option value="">--เลือก--</option>
+                <option value="2567">ปี 2567</option>
+                <option value="2568">ปี 2568</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="pt-6">
+            <label class="block text-sm font-medium text-gray-700 mb-3"
+              >ระดับชั้นที่รับผิดชอบสอน (เลือกได้มากกว่า 1 ข้อ) *</label
+            >
+            <div class="flex flex-wrap gap-4">
+              {
+                ["ม.1", "ม.2", "ม.3"].map((grade) => (
+                  <label class="inline-flex items-center bg-white border border-gray-200 px-3 py-2 rounded-md hover:bg-indigo-50 cursor-pointer transition">
+                    <input
+                      type="checkbox"
+                      name="entry.193034328"
+                      value={grade}
+                      class="form-checkbox h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                    />
+                    <span class="ml-2 text-gray-700">{grade}</span>
+                  </label>
+                ))
+              }
+            </div>
+            <p id="grade-error" class="hidden text-red-500 text-sm mt-2">
+              กรุณาเลือกระดับชั้นอย่างน้อย 1 ข้อ
+            </p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700"
+              >จำนวนนักเรียนทั้งหมดที่คาดว่าจะได้สอน (คน) *</label
+            >
+            <input
+              type="number"
+              name="entry.2060978043"
+              required
+              class="mt-1 block w-full md:w-1/2 rounded-md border-gray-300 shadow-sm border p-2 focus:border-indigo-500 focus:ring-indigo-500"
+              placeholder="เช่น 200"
+            />
+          </div>
+        </section>
+
+        <section
+          class="space-y-4 border p-6 rounded-lg bg-blue-50 border-blue-200"
+        >
+          <h2
+            class="text-xl font-semibold text-blue-900 border-b border-blue-300 pb-2"
+          >
+            หน่วยการเรียนรู้คุณครูจะจัดการเรียนการสอนในปีการศึกษา 2569
+          </h2>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >(เลือกได้มากกว่า 1 ข้อ และเลือกอย่างน้อย 4 หน่วยการเรียนรู้) *</label
+          >
+
+          <div class="space-y-3 mt-2">
+            {
+              [
+                "หน่วยที่ 1 ความสำคัญของแนวคิดเชิงคำนวณ (Concept)",
+                "หน่วยที่ 2 แนวคิดเชิงนามธรรม (Abstraction)",
+                "หน่วยที่ 3 การแยกส่วนประกอบ (Decomposition)",
+                "หน่วยที่ 4  การพิจารณารูปแบบ (Pattern Recognition)", // สังเกต: ตรงนี้มีเว้นวรรค 2 เคาะ ตามต้นฉบับ Google Form เป๊ะๆ
+                "หน่วยที่ 5 การออกแบบขั้นตอน (Algorithm)",
+                "หน่วยที่ 6 การประยุกต์ใช้แนวคิดเชิงคำนวณ (Computational Thinking)",
+                "หน่วยที่ 7 รู้ทันสื่อ (Media Literacy)",
+                "หน่วยที่ 8 เท่าทันเทคโนโลยี (Tech Literacy)",
+                "หน่วยที่ 9 การปฏิบัติการ Self Study การเขียนโปรแกรมภาษา Python",
+                "หน่วยที่ 10 เท่าทันเทคโนโลยีและภัยไซเบอร์ (Tech and Cyber Literacy) แผนการสอนจากเวิร์คชอป Lessons Learned ปี 2569",
+              ].map((unit) => (
+                <label class="flex items-start bg-white p-3 rounded-md border border-blue-100 hover:border-blue-300 cursor-pointer transition">
+                  <input
+                    type="checkbox"
+                    name="entry.1030308195"
+                    value={unit}
+                    class="mt-1 form-checkbox h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                  />
+                  <span class="ml-3 text-sm text-gray-700 leading-tight">
+                    {unit}
+                  </span>
+                </label>
+              ))
+            }
+          </div>
+          <p id="unit-error" class="hidden text-red-500 text-sm mt-2">
+            กรุณาเลือกหน่วยการเรียนรู้อย่างน้อย 4 ข้อ
+          </p>
+        </section>
+
+        <section class="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
+          <p class="font-medium text-gray-800 mb-4">
+            คุณครูมีความประสงค์เข้าร่วมโครงการ Samsung Innovation Campus ในปี
+            2569 *
+          </p>
+
+          <div class="space-y-3">
+            <label class="flex items-start cursor-pointer">
+              <input
+                type="radio"
+                name="entry.301327575"
+                value="รับทราบแนวทางการดำเนินโครงการในปี 2569 และยินดีร่วมโครงการ"
+                required
+                class="mt-1 h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+              />
+              <span
+                class="ml-3 text-sm text-gray-800 font-medium leading-relaxed"
+              >
+                รับทราบแนวทางการดำเนินโครงการในปี 2569 และยินดีร่วมโครงการ
+              </span>
+            </label>
+
+            <label class="flex items-start cursor-pointer">
+              <input
+                type="radio"
+                name="entry.301327575"
+                value="ไม่สะดวกเข้าร่วมโครงการในปีนี้"
+                required
+                class="mt-1 h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+              />
+              <span
+                class="ml-3 text-sm text-gray-800 font-medium leading-relaxed"
+              >
+                ไม่สะดวกเข้าร่วมโครงการในปีนี้
+              </span>
+            </label>
+          </div>
+        </section>
+
+        <div class="text-center pt-4">
+          <button
+            type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-10 rounded-lg shadow-lg transition duration-300 transform hover:-translate-y-1 text-lg"
+          >
+            ส่งข้อมูล
+          </button>
+        </div>
+      </form>
+
+      <iframe
+        name="hidden_iframe"
+        id="hidden_iframe"
+        style="display:none;"
+        onload="if(window.iframeLoaded) window.iframeLoaded();"></iframe>
+
+      <div
+        id="thankyou-message"
+        class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50"
+      >
+        <div
+          class="bg-white p-8 rounded-lg shadow-xl text-center max-w-sm mx-4"
+        >
+          <div class="text-green-500 text-5xl mb-4">✓</div>
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">
+            บันทึกข้อมูลสำเร็จ!
+          </h3>
+          <p class="text-gray-600 mb-6">
+            ขอบคุณสำหรับข้อมูล ทางโครงการฯ ได้รับข้อมูลเรียบร้อยแล้ว<br />
+            <span class="text-sm text-gray-500"
+              >(ท่านสามารถปิดหน้านี้ได้เลย)</span
+            >
+          </p>
+          <button
+            type="button"
+            onclick="closePopupAndReset()"
+            class="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition"
+          >
+            ตกลง
+          </button>
+        </div>
+      </div>
+
+      <script is:inline>
+        // ประกาศตัวแปรระดับ Global
+        window.isSubmitted = false;
+
+        // 1. ฟังก์ชันทำงานเมื่อ iframe โหลดเสร็จ (ผูกกับ window ให้ HTML มองเห็น)
+        window.iframeLoaded = function () {
+          if (window.isSubmitted) {
+            document
+              .getElementById("thankyou-message")
+              .classList.remove("hidden");
+            window.isSubmitted = false;
+          }
+        };
+
+        // 2. ฟังก์ชันปิด Popup
+        window.closePopupAndReset = function () {
+          document.getElementById("thankyou-message").classList.add("hidden");
+          document.getElementById("reportForm").reset();
+          window.scrollTo(0, 0);
+        };
+
+        // 3. ฟังก์ชันตรวจสอบฟอร์ม
+        window.validateForm = function () {
+          let isValid = true;
+
+          const grades = document.querySelectorAll(
+            'input[name="entry.193034328"]:checked',
+          );
+          const gradeError = document.getElementById("grade-error");
+          if (grades.length === 0) {
+            gradeError.classList.remove("hidden");
+            isValid = false;
+          } else {
+            gradeError.classList.add("hidden");
+          }
+
+          const units = document.querySelectorAll(
+            'input[name="entry.1030308195"]:checked',
+          );
+          const unitError = document.getElementById("unit-error");
+          if (units.length < 4) {
+            unitError.classList.remove("hidden");
+            isValid = false;
+          } else {
+            unitError.classList.add("hidden");
+          }
+
+          if (!isValid) {
+            alert(
+              "กรุณาเลือกข้อมูลในส่วนหน่วยการเรียนรู้ที่เป็นตัวเลือก (Checkbox) ให้ครบถ้วนตามที่กำหนด",
+            );
+          }
+          return isValid;
+        };
+
+        // 4. ฟังก์ชันจัดการตอนกดปุ่มส่ง
+        window.handleSubmit = function (e) {
+          if (window.validateForm()) {
+            window.isSubmitted = true;
+            return true;
+          } else {
+            e.preventDefault();
+            return false;
+          }
+        };
+      </script>
+    </div>
+  </main>
+</Layout>
