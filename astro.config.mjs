@@ -10,10 +10,8 @@ export default defineConfig({
   output: 'server',
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
   },
 
- adapter: cloudflare({
-    imageService: 'passthrough' 
-  }),
+ adapter: cloudflare(),
 });
