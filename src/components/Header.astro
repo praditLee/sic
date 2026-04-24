@@ -1,16 +1,57 @@
 ---
-// You can define props here if needed in the future
-const navLinks = [
+import { createServerClient } from "@supabase/ssr";
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+// ✅ 1. สร้าง Supabase แบบ "ดูแต่ตา มืออย่าต้อง" (Read-Only Client)
+const supabase = createServerClient(supabaseUrl, supabaseKey, {
+  cookies: {
+    get(key) {
+      return Astro.cookies.get(key)?.value;
+    },
+    // ปล่อยช่อง set และ remove ให้ว่างเปล่าไว้ เพื่อป้องกันไม่ให้มันพยายามแก้ Cookie ทีหลัง
+    set(key, value, options) {},
+    remove(key, options) {},
+  },
+});
+
+// ✅ 2. เช็ค User แบบปลอดภัย ไม่กวน Response
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+
+// 3. สร้างเมนูพื้นฐานที่ทุกคนเห็น
+let navLinks = [
   { href: "/", text: "Home" },
   { href: "/about", text: "About" },
+];
 
-  {
+// 4. กำหนดเงื่อนไขปุ่มตามสถานะ User
+if (user) {
+  // ✅ ถ้า "ล็อกอินแล้ว"
+  navLinks.push(
+    {
+      href: "/check-profile", // วิ่งไปด่านตรวจเพื่อเข้า Thinkific
+      text: "All Courses",
+      isButton: true,
+      external: false,
+    },
+    {
+      href: "/api/logout", // API สำหรับออกจากระบบ (เดี๋ยวเราค่อยสร้าง)
+      text: "Logout",
+      isButton: false,
+      external: false,
+    },
+  );
+} else {
+  navLinks.push({
     href: "/login",
     text: "Login",
     isButton: true,
-    external: true,
-  },
-];
+    external: false,
+  });
+}
 ---
 
 <header class="bg-white shadow-md sticky top-0 z-50">

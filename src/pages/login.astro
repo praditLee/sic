@@ -131,11 +131,11 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
     </div>
   </main>
 
-  <script is:inline type="module" define:vars={{ supabaseUrl, supabaseKey }}>
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-    const supabase = createClient(supabaseUrl, supabaseKey);
+  <script>
+    // 1. ดึง supabase จากไฟล์ lib ที่เราอัปเกรดเป็น BrowserClient แล้ว!
+    import { supabase } from "../lib/supabase";
 
-    // ตัวแปรเก็บสถานะว่าตอนนี้อยู่ในโหมด Login หรือเปล่า
+    // 2. ตัวแปรเก็บสถานะว่าตอนนี้อยู่ในโหมด Login หรือเปล่า
     let isLoginMode = true;
 
     // --- ส่วนการจัดการ UI เมื่อกดปุ่มสลับโหมด ---
@@ -146,9 +146,9 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
     const toggleTextLabel = document.getElementById("toggleTextLabel");
     const messageBox = document.getElementById("messageBox");
 
-    toggleModeBtn.addEventListener("click", () => {
-      isLoginMode = !isLoginMode; // สลับสถานะ
-      messageBox.classList.add("hidden"); // ซ่อนข้อความแจ้งเตือนเวลาสลับโหมด
+    toggleModeBtn?.addEventListener("click", () => {
+      isLoginMode = !isLoginMode;
+      messageBox.classList.add("hidden");
 
       if (isLoginMode) {
         pageTitle.textContent = "เข้าสู่ระบบ";
@@ -165,28 +165,31 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
       }
     });
 
-    // --- ส่วนการจัดการปุ่ม Google ---
+    // --- 3. ส่วนการจัดการปุ่ม Google Login ---
     document
       .getElementById("googleLoginBtn")
-      .addEventListener("click", async () => {
-        const { data, error } = await supabase.auth.signInWithOAuth({
+      ?.addEventListener("click", async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
           provider: "google",
           options: {
-            redirectTo: window.location.origin + "/check-profile",
+            // ชี้เป้าไปที่ด่านตรวจแบบคลีนๆ
+            redirectTo: window.location.origin + "/api/auth/callback",
           },
         });
-        if (error) console.error("Google Login Error:", error.message);
+
+        if (error) {
+          console.error("Google Login Error:", error.message);
+        }
       });
 
-    // --- ส่วนการจัดการ Submit ฟอร์ม (ทำงาน 2 หน้าที่ตามโหมด) ---
+    // --- 4. ส่วนการจัดการ Submit ฟอร์ม (Email/Password) ---
     document
       .getElementById("authForm")
-      .addEventListener("submit", async (e) => {
+      ?.addEventListener("submit", async (e) => {
         e.preventDefault();
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
 
-        // ล็อกปุ่มกันกดซ้ำ
         submitBtn.disabled = true;
         submitBtn.textContent = "กำลังดำเนินการ...";
         messageBox.classList.add("hidden");
@@ -194,29 +197,25 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
         let resultError = null;
 
         if (isLoginMode) {
-          // โหมดเข้าสู่ระบบ
           const { error } = await supabase.auth.signInWithPassword({
             email,
             password,
           });
           resultError = error;
         } else {
-          // โหมดสมัครสมาชิก
           const { error } = await supabase.auth.signUp({ email, password });
           resultError = error;
         }
 
         if (resultError) {
-          // ถ้ามี Error ให้โชว์ข้อความสีแดง
           messageBox.className =
             "text-center text-sm p-3 rounded mt-4 bg-red-50 text-red-600";
           messageBox.textContent = `เกิดข้อผิดพลาด: ${resultError.message}`;
-          // ปลดล็อกปุ่ม
           submitBtn.disabled = false;
           submitBtn.textContent = isLoginMode ? "เข้าสู่ระบบ" : "สมัครสมาชิก";
           messageBox.classList.remove("hidden");
         } else {
-          // สำเร็จ! ไม่ว่าสมัครหรือล็อกอิน ให้เด้งไปหน้าเช็คโปรไฟล์
+          // ให้มันวิ่งไปหน้าด่านตรวจเหมือนกัน เพื่อให้มันเช็ค Cookie ให้ชัวร์ก่อน
           window.location.href = "/check-profile";
         }
       });

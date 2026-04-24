@@ -1,4 +1,18 @@
 ---
+import { getSessionClient } from "../lib/supabase";
+
+// 1. เรียกใช้งาน Supabase ที่อ่าน Cookies ได้
+const supabase = getSessionClient(Astro.request, Astro.cookies);
+
+// 2. ขอข้อมูล User
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+
+// 3. ถ้าไม่มี User เตะกลับไปหน้า Login ทันที (จะขึ้นรหัส [302] ใน Log)
+if (!user) {
+  return Astro.redirect("/login");
+}
 import Layout from "../layouts/Layout.astro";
 import "../styles/global.css";
 
@@ -19,12 +33,12 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
     </div>
   </main>
 
-  <script is:inline type="module" define:vars={{ supabaseUrl, supabaseKey }}>
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-    const supabase = createClient(supabaseUrl, supabaseKey);
+  <script>
+    // ✅ 1. เปลี่ยนมาดึง supabase จากไฟล์ lib ของเรา (ตัวที่อ่าน Cookie เป็น)
+    import { supabase } from "../lib/supabase";
 
     async function checkUserProfile() {
-      // 1. เช็คว่าล็อกอินอยู่จริงไหม
+      // 1. เช็คว่าล็อกอินอยู่จริงไหม (ตอนนี้มันจะอ่านจาก Cookie ได้แล้ว!)
       const {
         data: { session },
         error: authError,
@@ -38,7 +52,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
       const userId = session.user.id;
 
-      // 2. ไปดึงข้อมูลจากตาราง public.profiles ของคนนี้มาดู
+      // 2. ไปดึงข้อมูลจากตาราง public.profiles
       const { data: profile, error: dbError } = await supabase
         .from("profiles")
         .select("is_profile_complete, occupation")
@@ -47,21 +61,17 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
       if (dbError || !profile) {
         console.error("Error fetching profile:", dbError);
-        // กรณีเกิดข้อผิดพลาด หรือหาตารางไม่เจอ ให้ส่งไปหน้า Login ก่อนเพื่อความปลอดภัย
         window.location.href = "/login";
         return;
       }
 
       // 3. กฎเหล็กในการส่งตัว (Routing Logic)
       if (profile.is_profile_complete === true) {
-        console.log("Profile Complete! Requesting SSO Ticket...");
-
         try {
           // ยิงไปขอตั๋ว SSO จาก API ของเรา
           const response = await fetch("/api/sso", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ access_token: session.access_token }),
           });
 
           const result = await response.json();
@@ -71,18 +81,17 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
             window.location.href = result.url;
           } else {
             console.error("SSO failed:", result.error);
-            alert("ไม่สามารถเข้าสู่ระบบห้องเรียนได้ กรุณาติดต่อแอดมิน");
+            alert(
+              "ไม่สามารถเข้าสู่ระบบห้องเรียนได้: " +
+                (result.error || "Unknown error"),
+            );
           }
         } catch (err) {
           console.error("Fetch SSO error:", err);
         }
       } else {
-        /**
-         * กรณีที่ 2: ข้อมูลยังไม่ครบ (เป็น FALSE หรือ NULL)
-         * ส่งไปหน้าแบบฟอร์ม 20 ข้อ เพื่อให้กรอกข้อมูลให้เสร็จ
-         */
         console.log("Profile Incomplete. Redirecting to Registration Form...");
-        window.location.href = "/complete-profile"; // เปลี่ยนเป็นชื่อไฟล์ฟอร์มของคุณ
+        window.location.href = "/complete-profile";
       }
     }
 

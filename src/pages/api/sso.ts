@@ -1,52 +1,47 @@
+import { getSessionClient } from '../../lib/supabase';
 import { SignJWT } from 'jose';
-import { createClient } from '@supabase/supabase-js';
 
-export const POST = async ({ request }) => {
+// ✅ 1. เพิ่ม `cookies` เข้ามาเป็นพารามิเตอร์
+export const POST = async ({ request, cookies }) => {
   try {
-    // 1. รับค่า Token ที่ส่งมาจากหน้าเช็คโปรไฟล์
-    const body = await request.json();
-    const { access_token } = body;
+    // ✅ 2. เรียกใช้ Supabase แบบที่อ่าน Cookies ได้ (ไม่ต้องใช้ createClient แบบเก่าแล้ว)
+    const supabase = getSessionClient(request, cookies);
 
-    if (!access_token) {
-      return new Response(JSON.stringify({ error: "Missing token" }), { status: 400 });
-    }
-
-    // 2. ยืนยันตัวตนกับ Supabase และดึงข้อมูลผู้ใช้
-    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-    const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser(access_token);
+    // ✅ 3. เช็คสถานะ User จาก Cookies ได้เลย (ไม่ต้องง้อ access_token จากหน้าเว็บ)
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
+    // ถ้าไม่มี User ใน Cookies ให้เตะออก
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
+      return new Response(JSON.stringify({ error: "Unauthorized: กรุณาล็อกอินใหม่" }), { status: 401 });
     }
 
-    // 3. ดึงชื่อ-นามสกุลภาษาอังกฤษจากตาราง profiles (เพื่อเอาไปทำ Certificate)
+    // --- ตั้งแต่ตรงนี้ลงไป โค้ดของคุณเขียนไว้ได้ดีและสมบูรณ์แบบมากครับ ใช้แบบเดิมได้เลย! ---
+
+    // 4. ดึงชื่อ-นามสกุลภาษาอังกฤษจากตาราง profiles
     const { data: profile } = await supabase
       .from('profiles')
       .select('first_name_en, last_name_en')
       .eq('id', user.id)
       .single();
 
-    // 4. เตรียมข้อมูลที่จะพิมพ์ลงในตั๋ว (SSO Payload)
-    // *ถ้าไม่มีชื่อภาษาอังกฤษ ให้ใช้คำว่า Student ไปก่อน (กัน Error)
+    // 5. เตรียมข้อมูลที่จะพิมพ์ลงในตั๋ว (SSO Payload)
     const payload = {
       email: user.email,
-      first_name: profile?.first_name_en || "Student",
+      first_name: profile?.first_name_en || "Student", // เผื่อกันเหนียวไว้
       last_name: profile?.last_name_en || "",
+      iat: Math.floor(Date.now() / 1000),
     };
 
-    // 5. นำกุญแจลับของ Thinkific มาสร้างตั๋ว JWT
+    // 6. นำกุญแจลับของ Thinkific มาสร้างตั๋ว JWT
     const secret = new TextEncoder().encode(import.meta.env.THINKIFIC_SSO_SECRET);
     const jwt = await new SignJWT(payload)
       .setProtectedHeader({ alg: 'HS256' })
-      .setIssuedAt() // ใส่เวลาที่ออกตั๋ว
+      .setIssuedAt() 
       .sign(secret);
 
-    // 6. สร้างลิงก์ส่งตัว (URL) กลับไปให้หน้าเว็บ
+    // 7. สร้างลิงก์ส่งตัว (URL) กลับไปให้หน้าเว็บ
     const subdomain = import.meta.env.THINKIFIC_SUBDOMAIN;
-    const returnUrl = `https://${subdomain}.thinkific.com/collections`; // หน้าที่อยากให้โผล่ไปหลังล็อกอินสำเร็จ
+    const returnUrl = `https://${subdomain}.thinkific.com/collections`; 
     const ssoUrl = `https://${subdomain}.thinkific.com/api/sso/v2/sso/jwt?jwt=${jwt}&return_to=${encodeURIComponent(returnUrl)}`;
 
     // ส่งลิงก์กลับไป

@@ -4,6 +4,18 @@ import { getCollection } from "astro:content";
 import CourseCard from "../components/CourseCard.astro";
 import Layout from "../layouts/Layout.astro";
 import "../styles/global.css";
+
+// ✅ 1. นำเข้า Supabase และเช็คสถานะการล็อกอิน
+import { getSessionClient } from "../lib/supabase";
+const supabase = getSessionClient(Astro.request, Astro.cookies);
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+
+// ✅ 2. ตั้งค่าข้อความและลิงก์ให้แปรผันตามสถานะ User
+const ctaLink = user ? "/check-profile" : "/login";
+const ctaText = user ? "เข้าสู่ห้องเรียน" : "ลงทะเบียนเข้าเรียนที่นี่!";
+
 // ดึงข้อมูลคอร์สทั้งหมดและเรียงลำดับจากใหม่ไปเก่า
 const allCourses = (await getCollection("courses")).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
@@ -36,11 +48,11 @@ const allCourses = (await getCollection("courses")).sort(
           />สร้างความเชี่ยวชาญก้าวไปเป็นผู้นำสำหรับโลกยุคใหม่
         </p>
         <a
-          href="https://courses.samsungsic-thailand.org/users/sign_in"
+          href={ctaLink}
           id="hero-register-btn"
           class="inline-block bg-white text-blue-700 font-bold py-3 px-8 rounded-lg text-lg hover:bg-gray-200 transition-transform hover:scale-105 shadow-lg"
         >
-          <h5>ลงทะเบียนเข้าเรียนที่นี่!</h5>
+          <h5>{ctaText}</h5>
         </a>
       </div>
       <div class="hidden md:flex justify-center">
@@ -108,14 +120,18 @@ const allCourses = (await getCollection("courses")).sort(
         </p>
       </div>
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {allCourses.map((course) => <CourseCard course={course} />)}
+        {
+          allCourses.map((course) => (
+            <CourseCard course={course} isLoggedIn={!!user} />
+          ))
+        }
       </div>
       <a
         id="footer-register-btn"
-        href="https://courses.samsungsic-thailand.org/users/sign_in"
+        href={ctaLink}
         class="w-60 mx-auto mt-20 block text-center bg-blue-600 text-white rounded-lg font-bold py-3 px-8 hover:bg-blue-700 transition"
       >
-        <h4 class="text-lg font-bold">ลงทะเบียนเข้าเรียนที่นี่!</h4>
+        <h4 class="text-lg font-bold">{ctaText}</h4>
       </a>
     </div>
   </section>
