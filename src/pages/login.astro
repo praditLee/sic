@@ -1,0 +1,225 @@
+---
+import Layout from "../layouts/Layout.astro";
+import "../styles/global.css";
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+---
+
+<Layout title="เข้าสู่ระบบ | SIC 2026">
+  <main
+    class="flex-1 bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8"
+  >
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+      <h2
+        id="pageTitle"
+        class="mt-6 text-center text-3xl font-extrabold text-gray-900"
+      >
+        เข้าสู่ระบบ
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        เพื่อเข้าร่วมโครงการ Samsung Innovation Campus 2569
+      </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div>
+          <button
+            id="googleLoginBtn"
+            type="button"
+            class="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out"
+          >
+            <svg
+              class="h-5 w-5 mr-2"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                fill="#4285F4"></path>
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853"></path>
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                fill="#FBBC05"></path>
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#EA4335"></path>
+            </svg>
+            เข้าสู่ระบบด้วย Google
+          </button>
+        </div>
+
+        <div class="mt-6">
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-gray-300"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span id="dividerText" class="px-2 bg-white text-gray-500">
+                หรือ เข้าสู่ระบบด้วยอีเมล
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <form class="mt-6 space-y-6" id="authForm">
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700"
+              >อีเมล</label
+            >
+            <div class="mt-1">
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              for="password"
+              class="block text-sm font-medium text-gray-700"
+              >รหัสผ่าน (ขั้นต่ำ 6 ตัวอักษร)</label
+            >
+            <div class="mt-1">
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                minlength="6"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              id="submitBtn"
+              class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+            >
+              เข้าสู่ระบบ
+            </button>
+          </div>
+
+          <div
+            id="messageBox"
+            class="hidden text-center text-sm p-3 rounded mt-4"
+          >
+          </div>
+        </form>
+
+        <div class="mt-6 text-center text-sm">
+          <span id="toggleTextLabel" class="text-gray-600"
+            >ยังไม่มีบัญชีใช่หรือไม่?</span
+          >
+          <button
+            type="button"
+            id="toggleModeBtn"
+            class="font-medium text-blue-600 hover:text-blue-500 ml-1 focus:outline-none"
+          >
+            สมัครสมาชิกใหม่
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script is:inline type="module" define:vars={{ supabaseUrl, supabaseKey }}>
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // ตัวแปรเก็บสถานะว่าตอนนี้อยู่ในโหมด Login หรือเปล่า
+    let isLoginMode = true;
+
+    // --- ส่วนการจัดการ UI เมื่อกดปุ่มสลับโหมด ---
+    const toggleModeBtn = document.getElementById("toggleModeBtn");
+    const pageTitle = document.getElementById("pageTitle");
+    const dividerText = document.getElementById("dividerText");
+    const submitBtn = document.getElementById("submitBtn");
+    const toggleTextLabel = document.getElementById("toggleTextLabel");
+    const messageBox = document.getElementById("messageBox");
+
+    toggleModeBtn.addEventListener("click", () => {
+      isLoginMode = !isLoginMode; // สลับสถานะ
+      messageBox.classList.add("hidden"); // ซ่อนข้อความแจ้งเตือนเวลาสลับโหมด
+
+      if (isLoginMode) {
+        pageTitle.textContent = "เข้าสู่ระบบ";
+        dividerText.textContent = "หรือ เข้าสู่ระบบด้วยอีเมล";
+        submitBtn.textContent = "เข้าสู่ระบบ";
+        toggleTextLabel.textContent = "ยังไม่มีบัญชีใช่หรือไม่?";
+        toggleModeBtn.textContent = "สมัครสมาชิกใหม่";
+      } else {
+        pageTitle.textContent = "สมัครสมาชิกใหม่";
+        dividerText.textContent = "หรือ สมัครสมาชิกด้วยอีเมล";
+        submitBtn.textContent = "สมัครสมาชิก";
+        toggleTextLabel.textContent = "มีบัญชีอยู่แล้ว?";
+        toggleModeBtn.textContent = "เข้าสู่ระบบ";
+      }
+    });
+
+    // --- ส่วนการจัดการปุ่ม Google ---
+    document
+      .getElementById("googleLoginBtn")
+      .addEventListener("click", async () => {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: window.location.origin + "/check-profile",
+          },
+        });
+        if (error) console.error("Google Login Error:", error.message);
+      });
+
+    // --- ส่วนการจัดการ Submit ฟอร์ม (ทำงาน 2 หน้าที่ตามโหมด) ---
+    document
+      .getElementById("authForm")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        // ล็อกปุ่มกันกดซ้ำ
+        submitBtn.disabled = true;
+        submitBtn.textContent = "กำลังดำเนินการ...";
+        messageBox.classList.add("hidden");
+
+        let resultError = null;
+
+        if (isLoginMode) {
+          // โหมดเข้าสู่ระบบ
+          const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          resultError = error;
+        } else {
+          // โหมดสมัครสมาชิก
+          const { error } = await supabase.auth.signUp({ email, password });
+          resultError = error;
+        }
+
+        if (resultError) {
+          // ถ้ามี Error ให้โชว์ข้อความสีแดง
+          messageBox.className =
+            "text-center text-sm p-3 rounded mt-4 bg-red-50 text-red-600";
+          messageBox.textContent = `เกิดข้อผิดพลาด: ${resultError.message}`;
+          // ปลดล็อกปุ่ม
+          submitBtn.disabled = false;
+          submitBtn.textContent = isLoginMode ? "เข้าสู่ระบบ" : "สมัครสมาชิก";
+          messageBox.classList.remove("hidden");
+        } else {
+          // สำเร็จ! ไม่ว่าสมัครหรือล็อกอิน ให้เด้งไปหน้าเช็คโปรไฟล์
+          window.location.href = "/check-profile";
+        }
+      });
+  </script>
+</Layout>

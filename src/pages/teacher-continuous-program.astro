@@ -1,6 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import "../styles/global.css";
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 ---
 
 <Layout title="แบบฟอร์มแสดงความประสงค์เข้าร่วมโครงการ">
@@ -215,32 +217,17 @@ import "../styles/global.css";
           <div class="space-y-3">
             <label class="flex items-start cursor-pointer">
               <input
-                type="radio"
+                type="checkbox"
                 name="entry.301327575"
                 value="รับทราบบันทึกข้อตกลงการดำเนินโครงการในปี 2569 และยินดีร่วมโครงการ"
                 required
-                class="mt-1 h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                class="mt-1 form-checkbox h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
               />
               <span
                 class="ml-3 text-sm text-gray-800 font-medium leading-relaxed"
               >
                 รับทราบบันทึกข้อตกลงการดำเนินโครงการในปี 2569
                 และยินดีร่วมโครงการ
-              </span>
-            </label>
-
-            <label class="flex items-start cursor-pointer">
-              <input
-                type="radio"
-                name="entry.301327575"
-                value="ไม่สะดวกเข้าร่วมโครงการในปีนี้"
-                required
-                class="mt-1 h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-              />
-              <span
-                class="ml-3 text-sm text-gray-800 font-medium leading-relaxed"
-              >
-                ไม่สะดวกเข้าร่วมโครงการในปีนี้
               </span>
             </label>
           </div>
@@ -289,11 +276,61 @@ import "../styles/global.css";
         </div>
       </div>
 
-      <script is:inline>
-        // ประกาศตัวแปรระดับ Global
-        window.isSubmitted = false;
+      <script is:inline type="module" define:vars={{ supabaseUrl, supabaseKey }}
+      >
+        import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-        // 1. ฟังก์ชันทำงานเมื่อ iframe โหลดเสร็จ (ผูกกับ window ให้ HTML มองเห็น)
+        // 1. เปลี่ยนจาก const เป็น window.supabase เพื่อให้เป็น Global
+        window.supabase = createClient(supabaseUrl, supabaseKey);
+
+        // ฟังก์ชันดึงข้อมูลมากรอกล่วงหน้า (Auto-fill)
+        async function prefillForm() {
+          try {
+            // 2. เรียกใช้ผ่าน window.supabase
+            const {
+              data: { session },
+            } = await window.supabase.auth.getSession();
+            if (!session) return;
+
+            const { data: profile, error } = await window.supabase
+              .from("profiles")
+              .select("*")
+              .eq("id", session.user.id)
+              .single();
+
+            if (error || !profile) return;
+
+            const nameInput = document.querySelector(
+              'input[name="entry.2120597359"]',
+            );
+            const phoneInput = document.querySelector(
+              'input[name="entry.1652591964"]',
+            );
+            const emailInput = document.querySelector(
+              'input[name="entry.58179007"]',
+            );
+            const schoolInput = document.querySelector(
+              'input[name="entry.381655348"]',
+            );
+
+            const fullName =
+              `${profile.first_name_th || ""} ${profile.last_name_th || ""}`.trim();
+
+            if (nameInput && fullName) nameInput.value = fullName;
+            if (phoneInput && profile.phone_number)
+              phoneInput.value = profile.phone_number;
+            if (emailInput && profile.email) emailInput.value = profile.email;
+            if (schoolInput && profile.school_name)
+              schoolInput.value = profile.school_name;
+          } catch (err) {
+            console.error("Error prefilling form:", err.message);
+          }
+        }
+
+        document.addEventListener("DOMContentLoaded", prefillForm);
+
+        // สคริปต์ควบคุม Iframe เดิม
+        window.isSubmitted = false;
         window.iframeLoaded = function () {
           if (window.isSubmitted) {
             document
@@ -303,17 +340,15 @@ import "../styles/global.css";
           }
         };
 
-        // 2. ฟังก์ชันปิด Popup
         window.closePopupAndReset = function () {
           document.getElementById("thankyou-message").classList.add("hidden");
           document.getElementById("reportForm").reset();
           window.scrollTo(0, 0);
         };
 
-        // 3. ฟังก์ชันตรวจสอบฟอร์ม
+        // ฟังก์ชันตรวจสอบฟอร์ม
         window.validateForm = function () {
           let isValid = true;
-
           const grades = document.querySelectorAll(
             'input[name="entry.193034328"]:checked',
           );
@@ -337,22 +372,41 @@ import "../styles/global.css";
           }
 
           if (!isValid) {
-            alert(
-              "กรุณาเลือกข้อมูลในส่วนหน่วยการเรียนรู้ที่เป็นตัวเลือก (Checkbox) ให้ครบถ้วนตามที่กำหนด",
-            );
+            alert("กรุณากรอกข้อมูลและเลือกหน่วยการเรียนรู้ให้ครบถ้วน");
           }
           return isValid;
         };
 
-        // 4. ฟังก์ชันจัดการตอนกดปุ่มส่ง
-        window.handleSubmit = function (e) {
+        // ฟังก์ชันกดส่งข้อมูล
+        window.handleSubmit = async function (e) {
+          e.preventDefault();
+
           if (window.validateForm()) {
-            window.isSubmitted = true;
-            return true;
-          } else {
-            e.preventDefault();
-            return false;
+            const form = document.getElementById("reportForm");
+
+            try {
+              // 3. เปลี่ยนมาใช้ window.supabase ตรงนี้ด้วย
+              const {
+                data: { session },
+              } = await window.supabase.auth.getSession();
+
+              if (session) {
+                console.log("Logged in user: submitting to Google Form");
+              } else {
+                console.log("Guest user: submitting to Google Form");
+              }
+
+              // สั่งให้ฟอร์มส่งไปที่ Google Form
+              window.isSubmitted = true;
+              form.submit();
+            } catch (err) {
+              console.error("Auth error:", err.message);
+              // ถึงแม้จะเช็ค Auth พลาด ก็ยังให้ส่งเข้า Google Form ได้
+              window.isSubmitted = true;
+              form.submit();
+            }
           }
+          return false;
         };
       </script>
     </div>

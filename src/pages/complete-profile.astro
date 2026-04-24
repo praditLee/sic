@@ -1,0 +1,324 @@
+---
+import Layout from "../layouts/Layout.astro";
+import "../styles/global.css";
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+---
+
+<Layout title="ตั้งค่าโปรไฟล์ส่วนตัว | SIC 2026">
+  <main class="flex-1 bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div
+      class="max-w-3xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden"
+    >
+      <div class="bg-blue-600 p-6 text-white text-center">
+        <h1 class="text-2xl font-bold">ตั้งค่าโปรไฟล์ส่วนตัว</h1>
+        <p class="text-blue-100 text-sm mt-1">
+          กรุณากรอกข้อมูลให้ครบถ้วนเพื่อความสะดวกในการใช้งานระบบ
+        </p>
+      </div>
+
+      <form id="profileForm" class="p-8 space-y-6">
+        <section class="space-y-4">
+          <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">
+            ข้อมูลพื้นฐาน
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >ชื่อ (ภาษาไทย) *</label
+              >
+              <input
+                type="text"
+                name="first_name_th"
+                required
+                class="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >นามสกุล (ภาษาไทย) *</label
+              >
+              <input
+                type="text"
+                name="last_name_th"
+                required
+                class="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >First Name (English) *</label
+              >
+              <input
+                type="text"
+                name="first_name_en"
+                required
+                placeholder="For Certificate"
+                class="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Last Name (English) *</label
+              >
+              <input
+                type="text"
+                name="last_name_en"
+                required
+                placeholder="For Certificate"
+                class="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >วัน/เดือน/ปี เกิด *</label
+              >
+              <input
+                type="date"
+                name="date_of_birth"
+                required
+                class="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >เบอร์โทรศัพท์ *</label
+              >
+              <input
+                type="tel"
+                name="phone_number"
+                required
+                class="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section class="space-y-4 pt-4">
+          <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">
+            สถานะและอาชีพ
+          </h2>
+          <div>
+            <label class="block text-sm font-medium text-gray-700"
+              >อาชีพปัจจุบัน *</label
+            >
+            <select
+              id="occupationSelect"
+              name="occupation"
+              required
+              class="mt-1 block w-full border border-gray-300 p-2 rounded-md"
+            >
+              <option value="">-- กรุณาเลือก --</option>
+              <option value="teacher">คุณครู / อาจารย์</option>
+              <option value="student">นักเรียน / นักศึกษา</option>
+              <option value="general">บุคคลทั่วไป</option>
+            </select>
+          </div>
+
+          <div
+            id="dynamicFields"
+            class="space-y-4 bg-gray-50 p-4 rounded-md border border-dashed border-gray-300"
+          >
+            <p class="text-gray-500 text-sm italic text-center">
+              กรุณาเลือกอาชีพเพื่อกรอกข้อมูลเพิ่มเติม
+            </p>
+          </div>
+        </section>
+
+        <div class="pt-6">
+          <button
+            type="submit"
+            id="saveBtn"
+            class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow-lg"
+          >
+            บันทึกข้อมูลและเข้าสู่ระบบ
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script is:inline type="module" define:vars={{ supabaseUrl, supabaseKey }}>
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const occupationSelect = document.getElementById("occupationSelect");
+    const dynamicFields = document.getElementById("dynamicFields");
+
+    // 1. จัดการการแสดงผลช่องกรอกตามอาชีพ
+    occupationSelect.addEventListener("change", (e) => {
+      const val = e.target.value;
+      let html = "";
+
+      if (val === "teacher") {
+        html = `
+          <div class="grid grid-cols-1 gap-4">
+            <div><label class="block text-sm font-medium">ชื่อโรงเรียน *</label><input type="text" name="school_name" required class="mt-1 block w-full border p-2 rounded"></div>
+            <div><label class="block text-sm font-medium">สังกัด (เช่น สพฐ.)</label><input type="text" name="sangkat" class="mt-1 block w-full border p-2 rounded"></div>
+            <div><label class="block text-sm font-medium">ที่อยู่โรงเรียน (จังหวัด)</label><input type="text" name="province" class="mt-1 block w-full border p-2 rounded"></div>
+          </div>
+        `;
+      } else if (val === "student") {
+        html = `
+          <div class="grid grid-cols-1 gap-4">
+            <div>
+              <label class="block text-sm font-medium">ชื่อสถานศึกษา *</label>
+              <input type="text" id="student_school" name="school_name" required class="mt-1 block w-full border border-gray-300 p-2 rounded">
+            </div>
+            <div>
+              <label class="block text-sm font-medium">ระดับชั้นที่กำลังศึกษา *</label>
+              <input type="text" name="study_grade" required class="mt-1 block w-full border border-gray-300 p-2 rounded">
+            </div>
+            
+            <div class="mt-2">
+              <label class="flex items-center cursor-pointer">
+                <input type="checkbox" id="hasTeacherCheckbox" class="form-checkbox h-4 w-4 text-blue-600 rounded">
+                <span class="ml-2 text-sm text-gray-700">มีคุณครูที่ปรึกษา/ผู้แนะนำเข้าร่วมโครงการ</span>
+              </label>
+            </div>
+
+            <div id="teacherSearchBox" class="hidden bg-blue-50 p-3 rounded border border-blue-100">
+              <label class="block text-sm font-medium text-blue-800">ค้นหาและเลือกชื่อคุณครู *</label>
+              <input type="text" name="referred_teacher" id="referred_teacher_input" list="teacherList" placeholder="พิมพ์ชื่อเพื่อค้นหา..." class="mt-1 block w-full border border-gray-300 p-2 rounded">
+              <datalist id="teacherList">
+                </datalist>
+              <p class="text-xs text-gray-500 mt-1">รายชื่อจะกรองจากสถานศึกษาที่คุณพิมพ์ด้านบน</p>
+            </div>
+          </div>
+        `;
+
+        // --- ใส่ Logic หลังจากสร้าง HTML เสร็จ ---
+        setTimeout(() => {
+          const hasTeacherCheckbox =
+            document.getElementById("hasTeacherCheckbox");
+          const teacherSearchBox = document.getElementById("teacherSearchBox");
+          const studentSchoolInput = document.getElementById("student_school");
+          const teacherList = document.getElementById("teacherList");
+          const referredTeacherInput = document.getElementById(
+            "referred_teacher_input",
+          );
+
+          // 1. กด Checkbox ให้โชว์กล่องค้นหา
+          // ซ่อน/แสดงกล่องค้นหาเหมือนเดิม
+          hasTeacherCheckbox.addEventListener("change", (e) => {
+            if (e.target.checked) {
+              teacherSearchBox.classList.remove("hidden");
+              referredTeacherInput.setAttribute("required", "required");
+            } else {
+              teacherSearchBox.classList.add("hidden");
+              referredTeacherInput.removeAttribute("required");
+              referredTeacherInput.value = "";
+            }
+          });
+
+          // ไฮไลท์การแก้ปัญหา: ให้นักเรียนพิมพ์ "ชื่อครู" แล้วระบบไปค้นหาจากชื่อแทน
+          referredTeacherInput.addEventListener("input", async (e) => {
+            const keyword = e.target.value.trim();
+
+            if (keyword.length < 2) return; // พิมพ์อย่างน้อย 2 ตัวอักษรค่อยเริ่มหา (ลดภาระเซิร์ฟเวอร์)
+
+            teacherList.innerHTML = ""; // ล้างค่าเก่า
+
+            // ค้นหาครูที่ ชื่อ หรือ นามสกุล ตรงกับที่พิมพ์
+            const { data, error } = await supabase
+              .from("profiles")
+              .select("first_name_th, last_name_th, school_name")
+              .eq("occupation", "teacher")
+              .or(
+                `first_name_th.ilike.%${keyword}%,last_name_th.ilike.%${keyword}%`,
+              )
+              .limit(10); // จำกัดผลลัพธ์แค่ 10 คนกันรายการยาวเกิน
+
+            if (!error && data) {
+              data.forEach((teacher) => {
+                // เอาชื่อโรงเรียนมาต่อท้ายชื่อครู ให้นักเรียนยืนยันได้ง่ายๆ
+                const fullName = `${teacher.first_name_th} ${teacher.last_name_th} (${teacher.school_name || "ไม่ระบุโรงเรียน"})`;
+                const option = document.createElement("option");
+                option.value = fullName;
+                teacherList.appendChild(option);
+              });
+            }
+          });
+
+          // 2. ถ้าพิมพ์เปลี่ยนชื่อโรงเรียน ให้ดึงข้อมูลครูใหม่
+          studentSchoolInput.addEventListener("input", async (e) => {
+            if (hasTeacherCheckbox.checked) {
+              await fetchTeachers(e.target.value);
+            }
+          });
+
+          // ฟังก์ชันดึงรายชื่อครูจาก Supabase
+          async function fetchTeachers(schoolName) {
+            teacherList.innerHTML = ""; // ล้างค่าเก่า
+
+            // ค้นหาคนที่เป็น 'teacher' และชื่อโรงเรียนมีคำที่พิมพ์อยู่
+            let query = supabase
+              .from("profiles")
+              .select("first_name_th, last_name_th")
+              .eq("occupation", "teacher");
+
+            if (schoolName && schoolName.trim() !== "") {
+              // ใช้ ilike เพื่อค้นหาคำบางส่วน (เช่น พิมพ์ "สตรี" ก็เจอ "สตรีวิทยา")
+              query = query.ilike("school_name", `%${schoolName}%`);
+            }
+
+            const { data, error } = await query;
+
+            if (!error && data) {
+              data.forEach((teacher) => {
+                const fullName =
+                  `${teacher.first_name_th} ${teacher.last_name_th}`.trim();
+                const option = document.createElement("option");
+                option.value = fullName;
+                teacherList.appendChild(option);
+              });
+            }
+          }
+        }, 50); // ดีเลย์นิดนึงเพื่อให้ DOM เรนเดอร์ HTML ก่อน
+      } else {
+        html = `<p class="text-center text-gray-600">ไม่ต้องกรอกข้อมูลเพิ่มเติม</p>`;
+      }
+      dynamicFields.innerHTML = html;
+    });
+
+    // 2. บันทึกข้อมูลลง Supabase
+    document
+      .getElementById("profileForm")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const saveBtn = document.getElementById("saveBtn");
+        saveBtn.disabled = true;
+        saveBtn.textContent = "กำลังบันทึก...";
+
+        const formData = new FormData(e.target);
+        const profileData = Object.fromEntries(formData.entries());
+
+        // ดึง ID ผู้ใช้ปัจจุบัน
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            ...profileData,
+            is_profile_complete: true, // บันทึกเสร็จแล้วให้เป็น True
+          })
+          .eq("id", session.user.id);
+
+        if (error) {
+          alert("เกิดข้อผิดพลาด: " + error.message);
+          saveBtn.disabled = false;
+          saveBtn.textContent = "บันทึกข้อมูลและเข้าสู่ระบบ";
+        } else {
+          // สำเร็จ! เด้งไปหน้า Thinkific หรือหน้าสมัครโครงการ
+          window.location.href = "/check-profile";
+        }
+      });
+  </script>
+</Layout>

@@ -1,0 +1,92 @@
+---
+import Layout from "../layouts/Layout.astro";
+import "../styles/global.css";
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+---
+
+<Layout title="กำลังตรวจสอบข้อมูล... | SIC 2026">
+  <main class="flex-1 flex flex-col items-center justify-center bg-white">
+    <div class="flex flex-col items-center">
+      <div
+        class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"
+      >
+      </div>
+      <p class="mt-4 text-gray-600 font-medium">
+        กำลังตรวจสอบสถานะผู้ใช้งาน...
+      </p>
+    </div>
+  </main>
+
+  <script is:inline type="module" define:vars={{ supabaseUrl, supabaseKey }}>
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    async function checkUserProfile() {
+      // 1. เช็คว่าล็อกอินอยู่จริงไหม
+      const {
+        data: { session },
+        error: authError,
+      } = await supabase.auth.getSession();
+
+      if (authError || !session) {
+        // ถ้าไม่ได้ล็อกอิน หรือเซสชันหมดอายุ ให้กลับไปหน้า Login
+        window.location.href = "/login";
+        return;
+      }
+
+      const userId = session.user.id;
+
+      // 2. ไปดึงข้อมูลจากตาราง public.profiles ของคนนี้มาดู
+      const { data: profile, error: dbError } = await supabase
+        .from("profiles")
+        .select("is_profile_complete, occupation")
+        .eq("id", userId)
+        .single();
+
+      if (dbError || !profile) {
+        console.error("Error fetching profile:", dbError);
+        // กรณีเกิดข้อผิดพลาด หรือหาตารางไม่เจอ ให้ส่งไปหน้า Login ก่อนเพื่อความปลอดภัย
+        window.location.href = "/login";
+        return;
+      }
+
+      // 3. กฎเหล็กในการส่งตัว (Routing Logic)
+      if (profile.is_profile_complete === true) {
+        console.log("Profile Complete! Requesting SSO Ticket...");
+
+        try {
+          // ยิงไปขอตั๋ว SSO จาก API ของเรา
+          const response = await fetch("/api/sso", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ access_token: session.access_token }),
+          });
+
+          const result = await response.json();
+
+          if (result.url) {
+            // ได้ตั๋วมาแล้ว พาเด้งไป Thinkific ทันที!
+            window.location.href = result.url;
+          } else {
+            console.error("SSO failed:", result.error);
+            alert("ไม่สามารถเข้าสู่ระบบห้องเรียนได้ กรุณาติดต่อแอดมิน");
+          }
+        } catch (err) {
+          console.error("Fetch SSO error:", err);
+        }
+      } else {
+        /**
+         * กรณีที่ 2: ข้อมูลยังไม่ครบ (เป็น FALSE หรือ NULL)
+         * ส่งไปหน้าแบบฟอร์ม 20 ข้อ เพื่อให้กรอกข้อมูลให้เสร็จ
+         */
+        console.log("Profile Incomplete. Redirecting to Registration Form...");
+        window.location.href = "/complete-profile"; // เปลี่ยนเป็นชื่อไฟล์ฟอร์มของคุณ
+      }
+    }
+
+    // รันฟังก์ชันทันทีที่โหลดหน้า
+    checkUserProfile();
+  </script>
+</Layout>
