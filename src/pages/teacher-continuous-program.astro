@@ -343,6 +343,16 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
         window.closePopupAndReset = function () {
           document.getElementById("thankyou-message").classList.add("hidden");
           document.getElementById("reportForm").reset();
+
+          // --- สิ่งที่เพิ่มเข้ามา: คืนค่าปุ่มให้กลับมากดได้เหมือนเดิม ---
+          const submitBtn = document.querySelector('button[type="submit"]');
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = "ส่งข้อมูล";
+            submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
+          }
+          // ----------------------------------------
+
           window.scrollTo(0, 0);
         };
 
@@ -381,11 +391,19 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
         window.handleSubmit = async function (e) {
           e.preventDefault();
 
+          // --- สิ่งที่เพิ่มเข้ามา: ล็อกปุ่มป้องกันการกดเบิ้ล ---
+          const submitBtn = document.querySelector('button[type="submit"]');
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = "กำลังส่งข้อมูล...";
+            submitBtn.classList.add("opacity-50", "cursor-not-allowed");
+          }
+          // ----------------------------------------
+
           if (window.validateForm()) {
             const form = document.getElementById("reportForm");
-
             try {
-              // 3. เปลี่ยนมาใช้ window.supabase ตรงนี้ด้วย
+              // เช็ค Session
               const {
                 data: { session },
               } = await window.supabase.auth.getSession();
@@ -404,6 +422,13 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
               // ถึงแม้จะเช็ค Auth พลาด ก็ยังให้ส่งเข้า Google Form ได้
               window.isSubmitted = true;
               form.submit();
+            }
+          } else {
+            // --- สิ่งที่เพิ่มเข้ามา: ถ้ากรอกฟอร์มไม่ครบ ให้ปลดล็อกปุ่มกลับมา ---
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = "ส่งข้อมูล";
+              submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
             }
           }
           return false;
