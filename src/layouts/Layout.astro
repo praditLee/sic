@@ -2,6 +2,7 @@
 // src/layouts/BaseLayout.astro
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import CookieToast from "../components/CookieToast.astro";
 import "../styles/global.css"; // Import สไตล์หลัก
 
 // รับ title จากหน้าเพจ
@@ -20,9 +21,31 @@ const { title } = Astro.props;
       content="ปลดล็อกศักยภาพด้านเทคโนโลยี สร้างความเชี่ยวชาญก้าวไปเป็นผู้นำสำหรับโลกยุคใหม่"
     />
     <title>{title} | Samsung Innovation Campus</title>
+    <!-- 1. ตั้งค่า Default Consent Mode (ต้องวางก่อน GTM เสมอ) -->
+    <script is:inline>
+      // สร้าง dataLayer มารอรับข้อมูล
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
 
-    <!-- Google Tag Manager -->
-    <script>
+      // เช็คว่าเคยยอมรับไปหรือยัง
+      const hasConsented = localStorage.getItem("cookieConsent") === "true";
+
+      // ตั้งค่าเริ่มต้น (บล็อกถ้ายังไม่เคยกด, อนุญาตถ้าเคยยอมรับแล้ว)
+      gtag("consent", "default", {
+        analytics_storage: hasConsented ? "granted" : "denied",
+        ad_storage: hasConsented ? "granted" : "denied",
+        personalization_storage: hasConsented ? "granted" : "denied",
+      });
+
+      // (ออปชันเสริม) บอก GTM ว่าข้อมูลมาจากหน้าเว็บไหน เผื่อใช้ดักจับ Event
+      dataLayer.push({
+        event: "default_consent",
+      });
+    </script>
+    <!-- 2. โค้ด Google Tag Manager ของคุณ (วางต่อลงมาเลย) -->
+    <script is:inline>
       (function (w, d, s, l, i) {
         w[l] = w[l] || [];
         w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
@@ -66,5 +89,6 @@ const { title } = Astro.props;
     <slot />
 
     <Footer />
+    <CookieToast />
   </body>
 </html>

@@ -1,0 +1,89 @@
+---
+// src/components/CookieToast.astro
+---
+
+<div
+  id="cookie-toast"
+  class="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[9999] bg-white p-6 rounded-2xl shadow-2xl max-w-md border border-gray-100 hidden transform transition-all duration-500 translate-y-10 opacity-0"
+>
+  <div class="flex items-start gap-4">
+    <div class="text-3xl">🍪</div>
+    <div>
+      <h3 class="text-lg font-bold text-gray-900 mb-1">
+        เราให้ความสำคัญกับความเป็นส่วนตัวของคุณ
+      </h3>
+      <p class="text-sm text-gray-600 mb-4 leading-relaxed">
+        เราใช้คุกกี้เพื่อปรับปรุงประสบการณ์การท่องเว็บของคุณและวิเคราะห์ข้อมูลการเข้าชมของเรา
+        การคลิก "ยอมรับ" ถือว่าคุณยินยอมให้เราใช้งานคุกกี้ อ่าน
+        <a
+          href="/en/privacy-policy"
+          class="text-blue-600 underline hover:text-blue-800 transition-colors"
+          >Privacy Policy ที่นี่</a
+        >
+      </p>
+      <div class="flex gap-3">
+        <button
+          id="btn-accept-cookies"
+          class="flex-1 bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-md"
+        >
+          ยอมรับ
+        </button>
+        <button
+          id="btn-close-cookies"
+          class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-500 hover:bg-gray-100 transition border border-transparent"
+        >
+          ปฏิเสธ
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  // รอให้หน้าเว็บโหลดเสร็จก่อน
+  document.addEventListener("DOMContentLoaded", () => {
+    const toast = document.getElementById("cookie-toast");
+    const btnAccept = document.getElementById("btn-accept-cookies");
+    const btnClose = document.getElementById("btn-close-cookies");
+
+    if (!toast || !btnAccept || !btnClose) return;
+
+    // เช็คว่าเคยมีประวัติการกด Accept ในเครื่องผู้ใช้หรือยัง
+    const hasConsented = localStorage.getItem("cookieConsent");
+
+    if (!hasConsented) {
+      // ถ้ายังไม่เคย ให้โชว์ Toast (ดีเลย์ 1 วินาทีหลังจากโหลดหน้าเว็บเสร็จ เพื่อไม่ให้ดูตกใจ)
+      setTimeout(() => {
+        toast.classList.remove("hidden");
+        // รอแป๊บนึงเพื่อให้เบราว์เซอร์ลบ hidden ออกก่อน ค่อยสั่งเล่น Animation
+        setTimeout(() => {
+          toast.classList.remove("translate-y-10", "opacity-0");
+        }, 50);
+      }, 1000);
+    }
+
+    // ฟังก์ชันปิด Toast พร้อมเล่น Animation ย้อนกลับ
+    const hideToast = () => {
+      toast.classList.add("translate-y-10", "opacity-0");
+      // รอให้ Animation เฟดจบก่อน (500ms) แล้วค่อยซ่อนกล่องทิ้ง
+      setTimeout(() => {
+        toast.classList.add("hidden");
+      }, 500);
+    };
+
+    // เวลากด Accept ให้บันทึกค่าลงเครื่อง แล้วอัปเดต Google Consent
+    btnAccept.addEventListener("click", () => {
+      localStorage.setItem("cookieConsent", "true");
+
+      // ส่งสัญญาณไปบอก Google Analytics ว่าผู้ใช้อนุญาตแล้ว!
+      if (typeof gtag === "function") {
+        gtag("consent", "update", {
+          analytics_storage: "granted",
+          ad_storage: "granted",
+        });
+      }
+
+      hideToast();
+    });
+  });
+</script>
