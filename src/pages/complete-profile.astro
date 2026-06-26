@@ -265,33 +265,44 @@ if (phoneClean.length === 9 && !phoneClean.startsWith("0")) {
     const occupationSelect = document.getElementById("occupationSelect");
     const dynamicFields = document.getElementById("dynamicFields");
 
-    // --- ระบบดักจับการกรอกภาษา ไทย/อังกฤษ ---
+    // --- ระบบดักจับการกรอกภาษา ไทย/อังกฤษ และทำความสะอาดช่องว่าง ---
     const setupLanguageValidation = () => {
-      // 1. ดึงช่องกรอกข้อมูลภาษาไทยมาทั้งหมด
+      // 1. ดึงช่องกรอกข้อมูลมา
       const thInputs = document.querySelectorAll(
         'input[name="first_name_th"], input[name="last_name_th"]',
       );
-      // 2. ดึงช่องกรอกข้อมูลภาษาอังกฤษมาทั้งหมด
       const enInputs = document.querySelectorAll(
         'input[name="first_name_en"], input[name="last_name_en"]',
       );
 
-      // กฎสำหรับภาษาไทย: อนุญาตเฉพาะ ก-ฮ, สระ, วรรณยุกต์ (ก-๙) และช่องว่าง (\s)
+      // 2. ฟังก์ชันสำหรับทำความสะอาดช่องว่าง เมื่อผู้ใช้พิมพ์เสร็จ (คลิกออก)
+      const cleanSpacesOnBlur = (e) => {
+        const target = e.target;
+        // .trim() = ลบช่องว่างหน้าสุดและหลังสุด
+        // .replace(/\s+/g, " ") = ยุบช่องว่างตรงกลางที่เกิน 1 เคาะ ให้เหลือแค่ 1 เคาะ
+        target.value = target.value.trim().replace(/\s+/g, " ");
+      };
+
+      // 3. กฎสำหรับภาษาไทย
       thInputs.forEach((input) => {
+        // ขณะพิมพ์: อนุญาตเฉพาะ ก-๙ และช่องว่าง
         input.addEventListener("input", (e) => {
           const target = e.target;
-          // ถ้าพิมพ์ตัวอักษรอื่นที่ไม่ใช่ภาษาไทย ให้แทนที่ด้วยความว่างเปล่า (ลบทิ้ง)
           target.value = target.value.replace(/[^ก-๙\s]/g, "");
         });
+        // เมื่อพิมพ์เสร็จ (คลิกออก): จัดการช่องว่าง
+        input.addEventListener("blur", cleanSpacesOnBlur);
       });
 
-      // กฎสำหรับภาษาอังกฤษ: อนุญาตเฉพาะ A-Z, a-z และช่องว่าง (\s)
+      // 4. กฎสำหรับภาษาอังกฤษ
       enInputs.forEach((input) => {
+        // ขณะพิมพ์: อนุญาตเฉพาะ A-Z, a-z และช่องว่าง
         input.addEventListener("input", (e) => {
           const target = e.target;
-          // ถ้าพิมพ์ตัวอักษรอื่นที่ไม่ใช่ภาษาอังกฤษ ให้แทนที่ด้วยความว่างเปล่า (ลบทิ้ง)
           target.value = target.value.replace(/[^A-Za-z\s]/g, "");
         });
+        // เมื่อพิมพ์เสร็จ (คลิกออก): จัดการช่องว่าง
+        input.addEventListener("blur", cleanSpacesOnBlur);
       });
     };
 
