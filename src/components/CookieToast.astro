@@ -82,7 +82,20 @@
           ad_storage: "granted",
         });
       }
+      hideToast();
+    });
+    // เวลากด ปฏิเสธ ให้บันทึกค่าลงเครื่องและปิดหน้าต่าง
+    btnClose.addEventListener("click", () => {
+      // บันทึกสถานะว่าผู้ใช้กดปฏิเสธแล้ว
+      localStorage.setItem("cookieConsent", "false");
 
+      // ส่งสัญญาณไปบอก Google Analytics ว่าผู้ใช้ไม่อนุญาต (denied)
+      if (typeof gtag === "function") {
+        gtag("consent", "update", {
+          analytics_storage: "denied",
+          ad_storage: "denied",
+        });
+      }
       hideToast();
     });
   });
