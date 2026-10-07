@@ -13,5 +13,9 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
 
- adapter: cloudflare(),
+ adapter: cloudflare({
+    platformProxy: {
+      enabled: false // <--- ปิดการสร้าง wrangler.json อัตโนมัติ
+    }
+  }),
 });
